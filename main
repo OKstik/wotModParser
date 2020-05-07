@@ -1,0 +1,28 @@
+from requests import get
+from bs4 import BeautifulSoup
+HTML = get("https://wotspeak.org/mods/")
+mods = []
+
+
+def get_all_content():
+    for i in range(1, num_last_page()):
+        print(f"Парсим {i} страницу...")
+        content_block = BeautifulSoup(get(f"https://wotspeak.org/mods/page/{i}/").text, features="html.parser").findAll("div", class_="short-right")
+        for item in content_block:
+            mods.append({
+                "Название мода": item.find("a", class_="short-title").get_text(),
+                "Ссылка на мод": item.find("a", class_="short-title").get(key="href")
+            })
+
+
+def num_last_page():
+    nums = BeautifulSoup(HTML.text, features="html.parser").find("span", class_="navigation").findAll("a")
+    return int(nums[-1].get_text())
+
+
+if HTML.status_code == 200:
+    get_all_content()
+    for mod in mods:
+        print(mod)
+else:
+    print("Проблемма с получением информации с сайта")
